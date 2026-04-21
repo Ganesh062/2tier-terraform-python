@@ -1,9 +1,9 @@
 variable "location" {
-  default = "East Asia"
+  default = "koreacentral"
 }
 
 variable "resource_group_name" {
-  default = "Uday_rg"
+  default = "ganesh_rgg"
 }
 
 variable "admin_username" {
@@ -11,7 +11,7 @@ variable "admin_username" {
 }
 
 variable "admin_password" {
-  default = "Password123!"
+  default = "Password@123"
 }
 
 variable "mysql_admin" {
