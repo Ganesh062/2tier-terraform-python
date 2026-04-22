@@ -1,47 +1,39 @@
 trigger:
-- main
+- master
 
 pool:
-  Image: mani
+  name: Default
 
-variables:
-  TF_VERSION: '1.6.6'
+steps:
 
-stages:
+- script: |
+    if ! command -v terraform >/dev/null 2>&1; then
+      sudo apt-get update
+      sudo apt-get install -y unzip wget
+      cd /tmp
+      wget https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_linux_amd64.zip
+      unzip -o terraform_1.7.5_linux_amd64.zip
+      sudo mv terraform /usr/local/bin/
+    fi
+    terraform version
+  displayName: Install Terraform
 
-- stage: Terraform
-  jobs:
-  - job: Deploy
-    steps:
+- script: |
+    cd terraform
+    terraform init
+  displayName: Terraform Init
 
-    # ✅ Install Terraform manually
-    - script: |
-        wget https://releases.hashicorp.com/terraform/$(TF_VERSION)/terraform_$(TF_VERSION)_linux_amd64.zip
-        unzip terraform_$(TF_VERSION)_linux_amd64.zip
-        sudo mv terraform /usr/local/bin/
-        terraform -version
-      displayName: "Install Terraform"
+- script: |
+    cd terraform
+    terraform validate
+  displayName: Terraform Validate
 
-    # ✅ Init
-    - script: terraform init
-      displayName: "Terraform Init"
+- script: |
+    cd terraform
+    terraform plan
+  displayName: Terraform Plan
 
-    # ✅ Validate
-    - script: terraform validate
-      displayName: "Terraform Validate"
-
-    # ✅ Plan
-    - script: |
-        terraform plan \
-        -var="admin_password=$(admin_password)" \
-        -var="mysql_password=$(mysql_password)" \
-        -out=tfplan
-      displayName: "Terraform Plan"
-
-    # ✅ Apply
-    - script: |
-        terraform apply \
-        -var="admin_password=$(admin_password)" \
-        -var="mysql_password=$(mysql_password)" \
-        -auto-approve tfplan
-      displayName: "Terraform Apply"
+- script: |
+    cd terraform
+    terraform apply -auto-approve
+  displayName: Terraform Apply
