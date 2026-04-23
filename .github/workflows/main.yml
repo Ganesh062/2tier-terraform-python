@@ -1,10 +1,31 @@
-name: Test Workflow
+name: Azure Terraform Deployment
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  test:
+  terraform:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Print Message
-        run: echo "Hello ganesh "
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
